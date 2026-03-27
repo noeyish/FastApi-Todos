@@ -12,6 +12,7 @@ class TodoItem(BaseModel):
     title: str
     description: str
     completed: bool
+    priority: str = "medium"  # low, medium, high
 
 # JSON 파일 경로
 TODO_FILE = "todo.json"
@@ -41,13 +42,24 @@ def create_todo(todo: TodoItem):
     save_todos(todos)
     return todo
 
+# To-Do 상태 토글 (완료/미완료)
+@app.patch("/todos/{todo_id}/toggle", response_model=TodoItem)
+def toggle_todo(todo_id: int):
+    todos = load_todos()
+    for todo in todos:
+        if todo["id"] == todo_id:
+            todo["completed"] = not todo.get("completed", False)
+            save_todos(todos)
+            return TodoItem(**todo)
+    raise HTTPException(status_code=404, detail="To-Do item not found")
+
 # To-Do 항목 수정
 @app.put("/todos/{todo_id}", response_model=TodoItem)
 def update_todo(todo_id: int, updated_todo: TodoItem):
     todos = load_todos()
     for todo in todos:
         if todo["id"] == todo_id:
-            todo.update(updated_todo.dict())
+            todo.update(updated_todo.model_dump())
             save_todos(todos)
             return updated_todo
     raise HTTPException(status_code=404, detail="To-Do item not found")
@@ -63,6 +75,8 @@ def delete_todo(todo_id: int):
 # HTML 파일 서빙
 @app.get("/", response_class=HTMLResponse)
 def read_root():
+    if not os.path.exists("templates/index.html"):
+        raise HTTPException(status_code=404, detail="Template not found")
     with open("templates/index.html", "r") as file:
         content = file.read()
     return HTMLResponse(content=content)
