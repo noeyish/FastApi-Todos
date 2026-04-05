@@ -1,13 +1,12 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    secret_key: str = "change-me"
-    access_token_expire_minutes: int = 30
-    database_url: str = "sqlite:///./app.db"
+    model_config = SettingsConfigDict(env_file=".env")
 
-    class Config:
-        env_file = ".env"
+    secret_key: str = "change-me"
+    access_token_expire_minutes: int = 60 * 24 * 7  # 7일
+    database_url: str = "sqlite:///./app.db"
 
 
 settings = Settings()

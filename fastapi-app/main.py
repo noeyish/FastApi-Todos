@@ -1,13 +1,21 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from core.database import Base, engine
 from routers import auth, todos
 import os
 
-Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="My TodoList")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
 
+
+app = FastAPI(title="My TodoList", lifespan=lifespan)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(auth.router)
 app.include_router(todos.router)
 
