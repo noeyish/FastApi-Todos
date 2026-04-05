@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
 from sqlalchemy.orm import relationship
 from core.database import Base
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
@@ -37,6 +37,8 @@ class TodoUpdate(BaseModel):
 
 
 class TodoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     description: str
@@ -44,6 +46,3 @@ class TodoResponse(BaseModel):
     priority: str
     due_date: Optional[date]
     user_id: int
-
-    class Config:
-        from_attributes = True

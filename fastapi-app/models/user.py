@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from core.database import Base
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 # ORM 모델
@@ -19,11 +19,10 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: str
-
-    class Config:
-        from_attributes = True
 
 
 class UserLogin(BaseModel):
