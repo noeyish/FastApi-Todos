@@ -4,11 +4,12 @@ UI 테스트 — Playwright 4/9 테스트 v4.0.0
 실행: pytest tests/test_ui.py -v --headed   (브라우저 보이게)
       pytest tests/test_ui.py -v            (헤드리스)
 """
+import os
 import uuid
 import pytest
 from playwright.sync_api import Page, expect
 
-BASE_URL = "http://localhost:5001"
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:5001")
 TEST_PASSWORD = "testpassword123"
 
 

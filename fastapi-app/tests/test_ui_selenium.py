@@ -7,6 +7,7 @@ UI 테스트 — Selenium
 - Playwright : MCP 연동, CDP 직접 통신, auto-wait, 빠름
 - Selenium   : WebDriver 프로토콜, 명시적 대기(WebDriverWait) 필요, 업계 표준
 """
+import os
 import uuid
 import pytest
 from selenium import webdriver
@@ -17,7 +18,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 
-BASE_URL = "http://localhost:5001"
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:5001")
 TEST_PASSWORD = "testpassword123"
 WAIT = 10  # 최대 대기 시간(초) — Playwright의 auto-wait에 대응
 
