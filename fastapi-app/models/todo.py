@@ -44,5 +44,5 @@ class TodoResponse(BaseModel):
     description: str
     completed: bool
     priority: str
-    due_date: Optional[date]
+    due_date: Optional[date] = None
     user_id: int

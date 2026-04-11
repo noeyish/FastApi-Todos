@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -10,10 +11,13 @@ from services import todo_service
 router = APIRouter(prefix="/todos", tags=["todos"])
 bearer = HTTPBearer()
 
+DbSession   = Annotated[Session, Depends(get_db)]
+Credentials = Annotated[HTTPAuthorizationCredentials, Depends(bearer)]
+
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer),
-    db: Session = Depends(get_db),
+    credentials: Credentials,
+    db: DbSession,
 ) -> User:
     payload = decode_access_token(credentials.credentials)
     user_id = payload.get("sub")
@@ -24,32 +28,55 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="사용자를 찾을 수 없습니다.")
     return user
 
+CurrentUser = Annotated[User, Depends(get_current_user)]
 
-@router.get("", response_model=list[TodoResponse])
-def list_todos(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+
+@router.get(
+    "",
+    response_model=list[TodoResponse],
+    responses={401: {"description": "인증 실패"}},
+)
+def list_todos(db: DbSession, current_user: CurrentUser):
     return todo_service.get_todos(db, current_user.id)
 
 
-@router.post("", response_model=TodoResponse, status_code=201)
-def create_todo(todo_in: TodoCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.post(
+    "",
+    response_model=TodoResponse,
+    status_code=201,
+    responses={401: {"description": "인증 실패"}},
+)
+def create_todo(todo_in: TodoCreate, db: DbSession, current_user: CurrentUser):
     return todo_service.create_todo(db, todo_in, current_user.id)
 
 
-@router.put("/{todo_id}", response_model=TodoResponse)
-def update_todo(todo_id: int, todo_in: TodoUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.put(
+    "/{todo_id}",
+    response_model=TodoResponse,
+    responses={401: {"description": "인증 실패"}, 404: {"description": "할 일을 찾을 수 없습니다."}},
+)
+def update_todo(todo_id: int, todo_in: TodoUpdate, db: DbSession, current_user: CurrentUser):
     todo = todo_service.update_todo(db, todo_id, todo_in, current_user.id)
     if not todo:
         raise HTTPException(status_code=404, detail="할 일을 찾을 수 없습니다.")
     return todo
 
 
-@router.delete("/{todo_id}", status_code=204)
-def delete_todo(todo_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.delete(
+    "/{todo_id}",
+    status_code=204,
+    responses={401: {"description": "인증 실패"}},
+)
+def delete_todo(todo_id: int, db: DbSession, current_user: CurrentUser):
     todo_service.delete_todo(db, todo_id, current_user.id)
 
 
-@router.patch("/{todo_id}/toggle", response_model=TodoResponse)
-def toggle_todo(todo_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.patch(
+    "/{todo_id}/toggle",
+    response_model=TodoResponse,
+    responses={401: {"description": "인증 실패"}, 404: {"description": "할 일을 찾을 수 없습니다."}},
+)
+def toggle_todo(todo_id: int, db: DbSession, current_user: CurrentUser):
     todo = todo_service.toggle_todo(db, todo_id, current_user.id)
     if not todo:
         raise HTTPException(status_code=404, detail="할 일을 찾을 수 없습니다.")
