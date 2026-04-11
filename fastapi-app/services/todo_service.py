@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from models.todo import Todo, TodoCreate, TodoUpdate
+from typing import Optional
 
 
 def get_todos(db: Session, user_id: int) -> list[Todo]:
@@ -14,7 +15,7 @@ def create_todo(db: Session, todo_in: TodoCreate, user_id: int) -> Todo:
     return todo
 
 
-def update_todo(db: Session, todo_id: int, todo_in: TodoUpdate, user_id: int) -> Todo:
+def update_todo(db: Session, todo_id: int, todo_in: TodoUpdate, user_id: int) -> Optional[Todo]:
     todo = db.query(Todo).filter(Todo.id == todo_id, Todo.user_id == user_id).first()
     if not todo:
         return None
@@ -32,7 +33,7 @@ def delete_todo(db: Session, todo_id: int, user_id: int) -> None:
         db.commit()
 
 
-def toggle_todo(db: Session, todo_id: int, user_id: int) -> Todo:
+def toggle_todo(db: Session, todo_id: int, user_id: int) -> Optional[Todo]:
     todo = db.query(Todo).filter(Todo.id == todo_id, Todo.user_id == user_id).first()
     if not todo:
         return None
