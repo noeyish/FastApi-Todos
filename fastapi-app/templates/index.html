@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do List</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=7">
 </head>
 <body>
 
@@ -81,6 +81,15 @@
             </form>
         </div>
 
+        <div class="search-wrap">
+            <div class="search-input-wrap">
+                <span class="search-icon-inner">&#128269;</span>
+                <input type="text" id="search-input" class="search-input" placeholder="할 일 검색..." oninput="renderTodos()" onkeydown="if(event.key==='Enter') renderTodos()">
+                <button class="search-clear" id="search-clear" onclick="clearSearch()" style="display:none" title="초기화">✕</button>
+            </div>
+            <button class="search-btn" onclick="renderTodos()">검색</button>
+        </div>
+
         <div class="toolbar">
             <div class="filter-tabs">
                 <button class="filter-btn active" onclick="filterTodos('all', this)">전체</button>
@@ -93,6 +102,8 @@
                 <button class="sort-btn" onclick="setSort('date', this)">날짜순</button>
             </div>
         </div>
+
+        <div id="search-result-info" style="display:none" class="search-result-info"></div>
 
         <div id="todo-list"></div>
     </div>
@@ -137,6 +148,6 @@
     </div>
 </div>
 
-<script src="/static/js/app.js"></script>
+<script src="/static/js/app.js?v=7"></script>
 </body>
 </html>

@@ -31,6 +31,7 @@ function setSort(sort, el) {
     renderTodos();
 }
 
+
 // ── 인증 ────────────────────────────────────────────────────
 const getToken   = () => localStorage.getItem('token');
 const setToken   = t  => localStorage.setItem('token', t);
@@ -138,16 +139,39 @@ async function fetchTodos() {
     renderTodos();
 }
 
+function clearSearch() {
+    const input = document.getElementById('search-input');
+    input.value = '';
+    document.getElementById('search-clear').style.display = 'none';
+    renderTodos();
+    input.focus();
+}
+
 function renderTodos() {
-    const list  = document.getElementById('todo-list');
-    const stats = document.getElementById('stats');
+    const list    = document.getElementById('todo-list');
+    const stats   = document.getElementById('stats');
+    const keyword = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
     list.innerHTML = '';
 
+    // filtered 먼저 계산
     const filtered = sortedTodos(allTodos.filter(t => {
         if (currentFilter === 'active')    return !t.completed;
         if (currentFilter === 'completed') return  t.completed;
         return true;
-    }));
+    }).filter(t => !keyword || t.title.toLowerCase().includes(keyword)));
+
+    // X 버튼 / 검색 결과 안내
+    const clearBtn   = document.getElementById('search-clear');
+    const resultInfo = document.getElementById('search-result-info');
+    if (clearBtn) clearBtn.style.display = keyword ? '' : 'none';
+    if (resultInfo) {
+        if (keyword) {
+            resultInfo.style.display = '';
+            resultInfo.textContent   = `'${keyword}' 검색 결과 ${filtered.length}개`;
+        } else {
+            resultInfo.style.display = 'none';
+        }
+    }
 
     const done = allTodos.filter(t => t.completed).length;
     stats.textContent = `${done} / ${allTodos.length} 완료`;
@@ -192,22 +216,79 @@ function makeTodoCard(todo) {
 
     const el = document.createElement('div');
     el.className = `todo-card ${cardCls}`;
+
+    // 제목 영역 (인라인 수정 가능)
+    const titleEl = document.createElement('div');
+    titleEl.className = `todo-title ${todo.completed ? 'done-text' : ''}`;
+    titleEl.innerHTML = `<span class="title-text" title="클릭해서 수정">${todo.title}</span>${priorityBadge}${dueBadgeHtml(todo.due_date, status)}`;
+
+    // 제목 텍스트 클릭 → 인라인 input 전환
+    titleEl.querySelector('.title-text').addEventListener('click', () => {
+        if (todo.completed) return;
+        startInlineEdit(titleEl, todo);
+    });
+
     el.innerHTML = `
         <input type="checkbox" class="todo-check" ${todo.completed ? 'checked' : ''}
-               onchange="toggleTodo(${todo.id})">
-        <div class="todo-body">
-            <div class="todo-title ${todo.completed ? 'done-text' : ''}">
-                ${todo.title}
-                ${priorityBadge}
-                ${dueBadgeHtml(todo.due_date, status)}
-            </div>
-            ${todo.description ? `<div class="todo-desc">${todo.description}</div>` : ''}
-        </div>
-        <div class="todo-actions">
-            <button class="btn-icon" onclick="openEdit(${todo.id})" title="수정">✎</button>
-            <button class="btn-icon del" onclick="deleteTodo(${todo.id})" title="삭제">✕</button>
-        </div>`;
+               onchange="toggleTodo(${todo.id})">`;
+
+    const body = document.createElement('div');
+    body.className = 'todo-body';
+    body.appendChild(titleEl);
+    if (todo.description) {
+        const desc = document.createElement('div');
+        desc.className = 'todo-desc';
+        desc.textContent = todo.description;
+        body.appendChild(desc);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'todo-actions';
+    actions.innerHTML = `
+        <button class="btn-icon" onclick="openEdit(${todo.id})" title="수정">✎</button>
+        <button class="btn-icon del" onclick="deleteTodo(${todo.id})" title="삭제">✕</button>`;
+
+    el.appendChild(body);
+    el.appendChild(actions);
     return el;
+}
+
+function startInlineEdit(titleEl, todo) {
+    const span = titleEl.querySelector('.title-text');
+    const original = todo.title;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = original;
+    input.className = 'inline-edit-input';
+
+    span.replaceWith(input);
+    input.focus();
+    input.select();
+
+    async function save() {
+        const newTitle = input.value.trim();
+        if (newTitle && newTitle !== original) {
+            const res = await apiFetch(`/todos/${todo.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    title:       newTitle,
+                    description: todo.description,
+                    priority:    todo.priority,
+                    due_date:    todo.due_date || null
+                })
+            });
+            if (res?.ok) { fetchTodos(); return; }
+        }
+        // 취소 or 변경 없음 → 원래 span 복원
+        input.replaceWith(span);
+    }
+
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter')  { e.preventDefault(); save(); }
+        if (e.key === 'Escape') { input.replaceWith(span); }
+    });
+    input.addEventListener('blur', save);
 }
 
 function filterTodos(filter, btn) {
