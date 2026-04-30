@@ -23,6 +23,22 @@
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
+[data-theme="dark"] {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --border: #2d3148;
+  --primary: #7a85ff;
+  --primary-h: #6060ff;
+  --danger: #f87171;
+  --warning: #fbbf24;
+  --success: #34d399;
+  --text-1: #f1f3f9;
+  --text-2: #9ca3b8;
+  --text-3: #6b7280;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
 body {
   font-family:
     "Inter",
@@ -202,6 +218,25 @@ body {
   color: var(--text-3);
 }
 
+.btn-dark-toggle {
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  font-size: 1rem;
+  color: var(--text-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.btn-dark-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .btn-logout {
   padding: 6px 14px;
   background: transparent;
@@ -223,6 +258,50 @@ body {
   max-width: 640px;
   margin: 0 auto;
   padding: 28px 20px;
+}
+
+/* ── 통계 대시보드 ─────────────────────────────── */
+.stats-dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-1);
+  line-height: 1;
+}
+
+.stat-active { color: var(--primary); }
+.stat-done   { color: var(--success); }
+.stat-rate   { color: var(--warning); }
+
+@media (max-width: 480px) {
+  .stats-dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* ── 입력 폼 ───────────────────────────────────── */
@@ -410,6 +489,36 @@ body {
   color: var(--text-2);
   margin-bottom: 10px;
   padding: 0 2px;
+}
+
+/* ── 카테고리 필터 ─────────────────────────────── */
+.category-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.cat-btn {
+  padding: 4px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-2);
+  transition: all 0.15s;
+}
+.cat-btn:hover {
+  background: var(--border);
+  color: var(--text-1);
+}
+.cat-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
 }
 
 /* ── 필터 / 정렬 ───────────────────────────────── */
@@ -682,6 +791,13 @@ body {
   color: #4338ca;
   border: 1px solid #c7d2fe;
 }
+
+.badge-cat          { font-weight: 500; }
+.badge-cat-general  { background: #f3f4f6; color: #374151; }
+.badge-cat-study    { background: #dbeafe; color: #1d4ed8; }
+.badge-cat-work     { background: #fce7f3; color: #9d174d; }
+.badge-cat-personal { background: #d1fae5; color: #065f46; }
+.badge-cat-health   { background: #fef3c7; color: #92400e; }
 
 .empty-state {
   text-align: center;

@@ -16,6 +16,7 @@ class Todo(Base):
     completed = Column(Boolean, default=False)
     priority = Column(String, default="medium")  # low | medium | high
     due_date = Column(Date, nullable=True)
+    category = Column(String, default="general")  # general | study | work | personal | health
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     owner = relationship("User")
@@ -27,6 +28,7 @@ class TodoCreate(BaseModel):
     description: str = ""
     priority: str = "medium"
     due_date: Optional[date] = None
+    category: str = "general"
 
 
 class TodoUpdate(BaseModel):
@@ -34,6 +36,7 @@ class TodoUpdate(BaseModel):
     description: Optional[str] = None
     priority: Optional[str] = None
     due_date: Optional[date] = None
+    category: Optional[str] = None
 
 
 class TodoResponse(BaseModel):
@@ -45,4 +48,5 @@ class TodoResponse(BaseModel):
     completed: bool
     priority: str
     due_date: Optional[date] = None
+    category: str = "general"
     user_id: int

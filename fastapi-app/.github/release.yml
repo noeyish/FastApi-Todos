@@ -1,0 +1,33 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+  categories:
+    - title: "기능 추가 (Feature)"
+      labels:
+        - feature
+        - feat
+    - title: "기능 개선 (Enhancement)"
+      labels:
+        - enhancement
+        - improve
+    - title: "결함 수정 (Bug Fix)"
+      labels:
+        - bug
+        - fix
+    - title: "테스트 (Test)"
+      labels:
+        - test
+    - title: "모니터링 (Monitoring)"
+      labels:
+        - monitoring
+        - observability
+    - title: "문서 (Docs)"
+      labels:
+        - documentation
+        - docs
+    - title: "기타 (Chore)"
+      labels:
+        - chore
+        - refactor
+        - ci

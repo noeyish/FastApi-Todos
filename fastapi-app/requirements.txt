@@ -15,3 +15,5 @@ pytest-html
 httpx
 pytest-cov
 pytest-playwright
+prometheus-fastapi-instrumentator
+prometheus-client

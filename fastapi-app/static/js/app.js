@@ -1,8 +1,17 @@
 let allTodos = [];
-let currentFilter = 'all';
-let currentSort   = 'default';
+let currentFilter   = 'all';
+let currentSort     = 'default';
+let currentCategory = 'all';
 
 const PRIORITY_RANK = { high: 0, medium: 1, low: 2 };
+
+const CATEGORY_LABEL = {
+    general:  '일반',
+    study:    '공부',
+    work:     '업무',
+    personal: '개인',
+    health:   '건강',
+};
 
 function sortedTodos(list) {
     const arr = [...list];
@@ -31,6 +40,25 @@ function setSort(sort, el) {
     renderTodos();
 }
 
+function filterCategory(cat, el) {
+    currentCategory = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderTodos();
+}
+
+// ── 다크 모드 ────────────────────────────────────────────────
+function toggleDark() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+}
+
+(function initTheme() {
+    const saved = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+})();
 
 // ── 인증 ────────────────────────────────────────────────────
 const getToken   = () => localStorage.getItem('token');
@@ -147,20 +175,31 @@ function clearSearch() {
     input.focus();
 }
 
+function renderStats() {
+    const total  = allTodos.length;
+    const done   = allTodos.filter(t => t.completed).length;
+    const active = total - done;
+    const rate   = total === 0 ? 0 : Math.round((done / total) * 100);
+    document.getElementById('stat-total').textContent  = total;
+    document.getElementById('stat-active').textContent = active;
+    document.getElementById('stat-done').textContent   = done;
+    document.getElementById('stat-rate').textContent   = rate + '%';
+}
+
 function renderTodos() {
     const list    = document.getElementById('todo-list');
     const stats   = document.getElementById('stats');
     const keyword = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+    renderStats();
     list.innerHTML = '';
 
-    // filtered 먼저 계산
     const filtered = sortedTodos(allTodos.filter(t => {
         if (currentFilter === 'active')    return !t.completed;
         if (currentFilter === 'completed') return  t.completed;
         return true;
-    }).filter(t => !keyword || t.title.toLowerCase().includes(keyword)));
+    }).filter(t => currentCategory === 'all' || t.category === currentCategory)
+      .filter(t => !keyword || t.title.toLowerCase().includes(keyword)));
 
-    // X 버튼 / 검색 결과 안내
     const clearBtn   = document.getElementById('search-clear');
     const resultInfo = document.getElementById('search-result-info');
     if (clearBtn) clearBtn.style.display = keyword ? '' : 'none';
@@ -212,17 +251,18 @@ function makeTodoCard(todo) {
         low:    '<span class="badge badge-low">낮음</span>'
     }[todo.priority] || '';
 
+    const cat = todo.category || 'general';
+    const categoryBadge = `<span class="badge badge-cat badge-cat-${cat}">${CATEGORY_LABEL[cat] || cat}</span>`;
+
     let cardCls = todo.completed ? 'done' : (status !== 'none' ? status : '');
 
     const el = document.createElement('div');
     el.className = `todo-card ${cardCls}`;
 
-    // 제목 영역 (인라인 수정 가능)
     const titleEl = document.createElement('div');
     titleEl.className = `todo-title ${todo.completed ? 'done-text' : ''}`;
-    titleEl.innerHTML = `<span class="title-text" title="클릭해서 수정">${todo.title}</span>${priorityBadge}${dueBadgeHtml(todo.due_date, status)}`;
+    titleEl.innerHTML = `<span class="title-text" title="클릭해서 수정">${todo.title}</span>${priorityBadge}${categoryBadge}${dueBadgeHtml(todo.due_date, status)}`;
 
-    // 제목 텍스트 클릭 → 인라인 input 전환
     titleEl.querySelector('.title-text').addEventListener('click', () => {
         if (todo.completed) return;
         startInlineEdit(titleEl, todo);
@@ -275,12 +315,12 @@ function startInlineEdit(titleEl, todo) {
                     title:       newTitle,
                     description: todo.description,
                     priority:    todo.priority,
+                    category:    todo.category,
                     due_date:    todo.due_date || null
                 })
             });
             if (res?.ok) { fetchTodos(); return; }
         }
-        // 취소 or 변경 없음 → 원래 span 복원
         input.replaceWith(span);
     }
 
@@ -316,6 +356,7 @@ function openEdit(id) {
     document.getElementById('edit-title').value       = t.title;
     document.getElementById('edit-description').value = t.description || '';
     document.getElementById('edit-priority').value    = t.priority;
+    document.getElementById('edit-category').value    = t.category || 'general';
     document.getElementById('edit-due_date').value    = t.due_date || '';
     document.getElementById('editOverlay').classList.add('open');
 }
@@ -337,6 +378,7 @@ async function submitEdit() {
             title:       document.getElementById('edit-title').value,
             description: document.getElementById('edit-description').value,
             priority:    document.getElementById('edit-priority').value,
+            category:    document.getElementById('edit-category').value,
             due_date:    due_date || null
         })
     });
@@ -351,6 +393,7 @@ document.getElementById('todo-form').addEventListener('submit', async e => {
         body: JSON.stringify({
             title:       document.getElementById('title').value,
             priority:    document.getElementById('priority').value,
+            category:    document.getElementById('category').value,
             description: document.getElementById('description').value,
             due_date:    due_date || null
         })
