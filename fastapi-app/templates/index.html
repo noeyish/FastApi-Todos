@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do List</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=7">
+    <link rel="stylesheet" href="/static/css/style.css?v=9">
 </head>
 <body>
 
@@ -58,11 +58,31 @@
         <span class="topbar-logo">To-Do List</span>
         <div class="topbar-right">
             <span id="stats"></span>
+            <button class="btn-dark-toggle" onclick="toggleDark()" title="다크 모드">◑</button>
             <button class="btn-logout" onclick="logout()">로그아웃</button>
         </div>
     </header>
 
     <div class="main-body">
+        <div class="stats-dashboard">
+            <div class="stat-card">
+                <span class="stat-label">전체</span>
+                <span class="stat-value" id="stat-total">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">진행 중</span>
+                <span class="stat-value stat-active" id="stat-active">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">완료</span>
+                <span class="stat-value stat-done" id="stat-done">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">완료율</span>
+                <span class="stat-value stat-rate" id="stat-rate">0%</span>
+            </div>
+        </div>
+
         <div class="add-card">
             <form id="todo-form">
                 <div class="add-row">
@@ -74,6 +94,13 @@
                         <option value="low">낮음</option>
                         <option value="medium" selected>보통</option>
                         <option value="high">높음</option>
+                    </select>
+                    <select id="category" class="form-select">
+                        <option value="general">일반</option>
+                        <option value="study">공부</option>
+                        <option value="work">업무</option>
+                        <option value="personal">개인</option>
+                        <option value="health">건강</option>
                     </select>
                     <input type="date" id="due_date" class="add-date">
                 </div>
@@ -101,6 +128,15 @@
                 <button class="sort-btn" onclick="setSort('priority', this)">우선순위</button>
                 <button class="sort-btn" onclick="setSort('date', this)">날짜순</button>
             </div>
+        </div>
+
+        <div class="category-filter" id="category-filter">
+            <button class="cat-btn active" onclick="filterCategory('all', this)">전체</button>
+            <button class="cat-btn" onclick="filterCategory('general', this)">일반</button>
+            <button class="cat-btn" onclick="filterCategory('study', this)">공부</button>
+            <button class="cat-btn" onclick="filterCategory('work', this)">업무</button>
+            <button class="cat-btn" onclick="filterCategory('personal', this)">개인</button>
+            <button class="cat-btn" onclick="filterCategory('health', this)">건강</button>
         </div>
 
         <div id="search-result-info" style="display:none" class="search-result-info"></div>
@@ -136,9 +172,19 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">완료일</label>
-                    <input type="date" id="edit-due_date" class="form-input">
+                    <label class="form-label">카테고리</label>
+                    <select id="edit-category" class="form-input" style="cursor:pointer;">
+                        <option value="general">일반</option>
+                        <option value="study">공부</option>
+                        <option value="work">업무</option>
+                        <option value="personal">개인</option>
+                        <option value="health">건강</option>
+                    </select>
                 </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">완료일</label>
+                <input type="date" id="edit-due_date" class="form-input">
             </div>
         </div>
         <div class="modal-footer">
@@ -148,6 +194,6 @@
     </div>
 </div>
 
-<script src="/static/js/app.js?v=7"></script>
+<script src="/static/js/app.js?v=9"></script>
 </body>
 </html>
