@@ -4,35 +4,51 @@
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="FastAPI Todo Load Test" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
-        <collectionProp name="Arguments.arguments">
-          <elementProp name="BASE_URL" elementType="Argument">
-            <stringProp name="Argument.name">BASE_URL</stringProp>
-            <stringProp name="Argument.value">${__P(BASE_URL,http://localhost:5001)}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="HOST" elementType="Argument">
-            <stringProp name="Argument.name">HOST</stringProp>
-            <stringProp name="Argument.value">${__groovy(def m = (vars.get("BASE_URL") =~ /https?:\/\/([^:\/]+)/); m ? m[0][1] : "localhost")}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="PORT" elementType="Argument">
-            <stringProp name="Argument.name">PORT</stringProp>
-            <stringProp name="Argument.value">${__groovy(def m = (vars.get("BASE_URL") =~ /:(\d+)/); m ? m[0][1] : "80")}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-        </collectionProp>
+        <collectionProp name="Arguments.arguments"/>
       </elementProp>
       <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
     <hashTree>
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp - Parse BASE_URL" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">stoptest</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+      </SetupThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Parse BASE_URL" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">def url = props.get(&quot;BASE_URL&quot;) ?: &quot;http://localhost:5001&quot;
+def m = url =~ /https?:\/\/([^:\/]+)(?::(\d+))?/
+if (m.find()) {
+    def host = m.group(1)
+    def port = m.group(2) ?: &quot;80&quot;
+    props.put(&quot;HOST&quot;, host)
+    props.put(&quot;PORT&quot;, port)
+    log.info(&quot;[setUp] BASE_URL=&quot; + url + &quot; → HOST=&quot; + host + &quot;, PORT=&quot; + port)
+} else {
+    log.error(&quot;[setUp] Failed to parse BASE_URL: &quot; + url)
+    props.put(&quot;HOST&quot;, &quot;localhost&quot;)
+    props.put(&quot;PORT&quot;, &quot;5001&quot;)
+}</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+
       <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
         <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
           <collectionProp name="Arguments.arguments"/>
         </elementProp>
-        <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
-        <stringProp name="HTTPSampler.port">${PORT}</stringProp>
+        <stringProp name="HTTPSampler.domain">${__P(HOST,localhost)}</stringProp>
+        <stringProp name="HTTPSampler.port">${__P(PORT,5001)}</stringProp>
         <stringProp name="HTTPSampler.protocol">http</stringProp>
       </ConfigTestElement>
       <hashTree/>
@@ -45,6 +61,7 @@
         </collectionProp>
       </HeaderManager>
       <hashTree/>
+
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="FastAPI Load Test" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
