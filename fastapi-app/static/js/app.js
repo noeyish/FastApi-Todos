@@ -2,6 +2,9 @@ let allTodos = [];
 let currentFilter   = 'all';
 let currentSort     = 'default';
 let currentCategory = 'all';
+let currentView     = 'list';
+let calCursor       = new Date();
+let calSelected     = new Date().toISOString().split('T')[0];
 
 const PRIORITY_RANK = { high: 0, medium: 1, low: 2 };
 
@@ -45,6 +48,131 @@ function filterCategory(cat, el) {
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
     renderTodos();
+}
+
+// ── 뷰 전환 / 캘린더 ─────────────────────────────────────────
+function setView(view) {
+    currentView = view;
+    document.getElementById('view-tab-list').classList.toggle('active', view === 'list');
+    document.getElementById('view-tab-calendar').classList.toggle('active', view === 'calendar');
+    document.getElementById('list-view').style.display     = view === 'list' ? '' : 'none';
+    document.getElementById('calendar-view').style.display = view === 'calendar' ? '' : 'none';
+
+    const hideInCal = view === 'calendar' ? 'none' : '';
+    document.getElementById('category-filter').style.display = hideInCal === 'none' ? 'none' : 'flex';
+    document.querySelector('.search-wrap').style.display     = hideInCal === 'none' ? 'none' : 'flex';
+    document.querySelector('.toolbar').style.display         = hideInCal === 'none' ? 'none' : 'flex';
+
+    if (view === 'calendar') renderCalendar();
+}
+
+function moveMonth(delta) {
+    calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() + delta, 1);
+    renderCalendar();
+}
+
+function goToday() {
+    calCursor = new Date();
+    calSelected = new Date().toISOString().split('T')[0];
+    renderCalendar();
+}
+
+function ymd(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function renderCalendar() {
+    const year  = calCursor.getFullYear();
+    const month = calCursor.getMonth();
+    document.getElementById('cal-title').textContent = `${year}년 ${month + 1}월`;
+
+    const first = new Date(year, month, 1);
+    const startDay = first.getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+    const todayStr = ymd(new Date());
+
+    const byDate = {};
+    allTodos.forEach(t => {
+        if (t.due_date) {
+            (byDate[t.due_date] = byDate[t.due_date] || []).push(t);
+        }
+    });
+
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < startDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'cal-cell cal-empty';
+        grid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= lastDate; d++) {
+        const dateStr = ymd(new Date(year, month, d));
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell';
+        if (dateStr === todayStr) cell.classList.add('cal-today-cell');
+        if (dateStr === calSelected) cell.classList.add('cal-selected-cell');
+
+        const dow = new Date(year, month, d).getDay();
+        if (dow === 0) cell.classList.add('cal-sun-cell');
+        if (dow === 6) cell.classList.add('cal-sat-cell');
+
+        const num = document.createElement('div');
+        num.className = 'cal-num';
+        num.textContent = d;
+        cell.appendChild(num);
+
+        const stack = document.createElement('div');
+        stack.className = 'cal-stack';
+        const items = byDate[dateStr] || [];
+        items.slice(0, 3).forEach(t => {
+            const bar = document.createElement('div');
+            bar.className = `cal-bar cal-bar-${t.category || 'general'} ${t.completed ? 'cal-bar-done' : ''}`;
+            bar.textContent = t.title;
+            stack.appendChild(bar);
+        });
+        if (items.length > 3) {
+            const more = document.createElement('div');
+            more.className = 'cal-more';
+            more.textContent = `+${items.length - 3}`;
+            stack.appendChild(more);
+        }
+        cell.appendChild(stack);
+
+        cell.addEventListener('click', () => {
+            calSelected = dateStr;
+            renderCalendar();
+        });
+
+        grid.appendChild(cell);
+    }
+
+    renderSelectedDay();
+}
+
+function renderSelectedDay() {
+    const header = document.getElementById('cal-selected-date');
+    const list   = document.getElementById('cal-selected-list');
+    list.innerHTML = '';
+
+    if (!calSelected) {
+        header.textContent = '날짜를 선택하세요';
+        return;
+    }
+
+    const [y, m, d] = calSelected.split('-');
+    header.textContent = `${parseInt(m)}월 ${parseInt(d)}일`;
+
+    const items = allTodos.filter(t => t.due_date === calSelected);
+    if (items.length === 0) {
+        list.innerHTML = '<div class="empty-state">이 날 할 일이 없습니다</div>';
+        return;
+    }
+    items.forEach(t => list.appendChild(makeTodoCard(t)));
 }
 
 // ── 다크 모드 ────────────────────────────────────────────────
@@ -191,6 +319,7 @@ function renderTodos() {
     const stats   = document.getElementById('stats');
     const keyword = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
     renderStats();
+    if (currentView === 'calendar') renderCalendar();
     list.innerHTML = '';
 
     const filtered = sortedTodos(allTodos.filter(t => {

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do List</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=9">
+    <link rel="stylesheet" href="/static/css/style.css?v=17">
 </head>
 <body>
 
@@ -64,6 +64,11 @@
     </header>
 
     <div class="main-body">
+        <div class="view-tabs">
+            <button class="view-tab active" id="view-tab-list" onclick="setView('list')">📋 목록</button>
+            <button class="view-tab" id="view-tab-calendar" onclick="setView('calendar')">📅 캘린더</button>
+        </div>
+
         <div class="stats-dashboard">
             <div class="stat-card">
                 <span class="stat-label">전체</span>
@@ -141,7 +146,32 @@
 
         <div id="search-result-info" style="display:none" class="search-result-info"></div>
 
-        <div id="todo-list"></div>
+        <div id="list-view">
+            <div id="todo-list"></div>
+        </div>
+
+        <div id="calendar-view" style="display:none">
+            <div class="cal-header">
+                <button class="cal-nav" onclick="moveMonth(-1)">‹</button>
+                <span class="cal-title" id="cal-title"></span>
+                <button class="cal-nav" onclick="moveMonth(1)">›</button>
+                <button class="cal-today" onclick="goToday()">오늘</button>
+            </div>
+            <div class="cal-weekdays">
+                <span class="cal-wd cal-sun">일</span>
+                <span class="cal-wd">월</span>
+                <span class="cal-wd">화</span>
+                <span class="cal-wd">수</span>
+                <span class="cal-wd">목</span>
+                <span class="cal-wd">금</span>
+                <span class="cal-wd cal-sat">토</span>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+            <div class="cal-selected">
+                <div class="cal-selected-header" id="cal-selected-date">날짜를 선택하세요</div>
+                <div id="cal-selected-list"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -194,6 +224,6 @@
     </div>
 </div>
 
-<script src="/static/js/app.js?v=9"></script>
+<script src="/static/js/app.js?v=17"></script>
 </body>
 </html>
