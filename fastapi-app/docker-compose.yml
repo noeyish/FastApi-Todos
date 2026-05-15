@@ -128,6 +128,20 @@ services:
     networks:
       - loadtest-net
 
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=jmeter
+      - INFLUXDB_HTTP_AUTH_ENABLED=false
+    volumes:
+      - influxdb-data:/var/lib/influxdb
+    restart: unless-stopped
+    networks:
+      - loadtest-net
+
 volumes:
   postgres_data:
   sonarqube_conf:
@@ -135,6 +149,7 @@ volumes:
   sonarqube_logs:
   sonarqube_extensions:
   grafana-data:
+  influxdb-data:
 
 networks:
   loadtest-net:
