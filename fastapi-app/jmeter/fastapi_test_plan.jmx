@@ -181,7 +181,7 @@ if (m.find()) {
               </elementProp>
               <elementProp name="influxdbUrl" elementType="Argument">
                 <stringProp name="Argument.name">influxdbUrl</stringProp>
-                <stringProp name="Argument.value">${__P(INFLUXDB_URL,http://163.239.77.77:8086/write?db=jmeter)}</stringProp>
+                <stringProp name="Argument.value">${__P(INFLUXDB_URL,http://163.239.77.66:8086/write?db=jmeter)}</stringProp>
               </elementProp>
               <elementProp name="application" elementType="Argument">
                 <stringProp name="Argument.name">application</stringProp>
