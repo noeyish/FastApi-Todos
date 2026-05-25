@@ -63,6 +63,15 @@ def update_todo(todo_id: int, todo_in: TodoUpdate, db: DbSession, current_user: 
 
 
 @router.delete(
+    "/completed",
+    responses={401: {"description": "인증 실패"}},
+)
+def delete_completed_todos(db: DbSession, current_user: CurrentUser):
+    deleted = todo_service.delete_completed(db, current_user.id)
+    return {"deleted": deleted}
+
+
+@router.delete(
     "/{todo_id}",
     status_code=204,
     responses={401: {"description": "인증 실패"}},

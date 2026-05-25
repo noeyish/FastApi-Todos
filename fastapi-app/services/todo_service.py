@@ -41,3 +41,13 @@ def toggle_todo(db: Session, todo_id: int, user_id: int) -> Optional[Todo]:
     db.commit()
     db.refresh(todo)
     return todo
+
+
+def delete_completed(db: Session, user_id: int) -> int:
+    deleted = (
+        db.query(Todo)
+        .filter(Todo.user_id == user_id, Todo.completed.is_(True))
+        .delete(synchronize_session=False)
+    )
+    db.commit()
+    return deleted

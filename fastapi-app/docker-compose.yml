@@ -26,9 +26,13 @@ services:
       - "5001:8000"
     env_file:
       - .env
+    environment:
+      - LOKI_ENDPOINT=http://loki:3100/loki/api/v1/push
     depends_on:
       db:
         condition: service_healthy
+      loki:
+        condition: service_started
     restart: unless-stopped
     networks:
       - loadtest-net
@@ -142,6 +146,32 @@ services:
     networks:
       - loadtest-net
 
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-data:/loki
+    restart: unless-stopped
+    networks:
+      - loadtest-net
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail/config.yml:/etc/promtail/config.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - loadtest-net
+
 volumes:
   postgres_data:
   sonarqube_conf:
@@ -150,6 +180,7 @@ volumes:
   sonarqube_extensions:
   grafana-data:
   influxdb-data:
+  loki-data:
 
 networks:
   loadtest-net:

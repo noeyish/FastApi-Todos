@@ -312,6 +312,26 @@ function renderStats() {
     document.getElementById('stat-active').textContent = active;
     document.getElementById('stat-done').textContent   = done;
     document.getElementById('stat-rate').textContent   = rate + '%';
+
+    // 필터 탭 개수 뱃지
+    document.getElementById('count-all').textContent       = total;
+    document.getElementById('count-active').textContent    = active;
+    document.getElementById('count-completed').textContent = done;
+
+    // 완료 항목 비우기 바 표시
+    const bulkBar = document.getElementById('bulk-bar');
+    if (bulkBar) {
+        bulkBar.style.display = done > 0 ? '' : 'none';
+        document.getElementById('bulk-count').textContent = done;
+    }
+}
+
+async function clearCompleted() {
+    const done = allTodos.filter(t => t.completed).length;
+    if (done === 0) return;
+    if (!confirm(`완료된 ${done}개 항목을 모두 삭제하시겠습니까?`)) return;
+    const res = await apiFetch('/todos/completed', { method: 'DELETE' });
+    if (res?.ok) fetchTodos();
 }
 
 function renderTodos() {

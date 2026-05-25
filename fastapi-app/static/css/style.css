@@ -819,6 +819,48 @@ body {
   color: var(--text-1);
 }
 
+/* ── 개수 뱃지 ─────────────────────────────────── */
+.count-badge {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 5px;
+  margin-left: 2px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 17px;
+  text-align: center;
+  border-radius: 9px;
+  background: var(--border);
+  color: var(--text-2);
+}
+.filter-btn.active .count-badge {
+  background: var(--surface);
+  color: var(--text-1);
+}
+
+/* ── 완료 비우기 바 ────────────────────────────── */
+.bulk-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+.bulk-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.bulk-btn:hover {
+  border-color: var(--text-1);
+  color: var(--text-1);
+}
+
 /* ── 섹션 헤더 ─────────────────────────────────── */
 .section-header {
   font-size: 0.72rem;
