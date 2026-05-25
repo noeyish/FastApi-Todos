@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do List</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=17">
+    <link rel="stylesheet" href="/static/css/style.css?v=18">
 </head>
 <body>
 
@@ -124,15 +124,19 @@
 
         <div class="toolbar">
             <div class="filter-tabs">
-                <button class="filter-btn active" onclick="filterTodos('all', this)">전체</button>
-                <button class="filter-btn" onclick="filterTodos('active', this)">진행 중</button>
-                <button class="filter-btn" onclick="filterTodos('completed', this)">완료</button>
+                <button class="filter-btn active" onclick="filterTodos('all', this)">전체 <span class="count-badge" id="count-all">0</span></button>
+                <button class="filter-btn" onclick="filterTodos('active', this)">진행 중 <span class="count-badge" id="count-active">0</span></button>
+                <button class="filter-btn" onclick="filterTodos('completed', this)">완료 <span class="count-badge" id="count-completed">0</span></button>
             </div>
             <div class="sort-tabs">
                 <button class="sort-btn active" onclick="setSort('default', this)">등록순</button>
                 <button class="sort-btn" onclick="setSort('priority', this)">우선순위</button>
                 <button class="sort-btn" onclick="setSort('date', this)">날짜순</button>
             </div>
+        </div>
+
+        <div class="bulk-bar" id="bulk-bar" style="display:none">
+            <button class="bulk-btn" onclick="clearCompleted()">완료 항목 비우기 <span id="bulk-count">0</span></button>
         </div>
 
         <div class="category-filter" id="category-filter">
@@ -224,6 +228,6 @@
     </div>
 </div>
 
-<script src="/static/js/app.js?v=17"></script>
+<script src="/static/js/app.js?v=18"></script>
 </body>
 </html>
