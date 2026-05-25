@@ -136,7 +136,7 @@ services:
     image: influxdb:1.8
     container_name: influxdb
     ports:
-      - "8086:8086"
+      - "8087:8086"
     environment:
       - INFLUXDB_DB=jmeter
       - INFLUXDB_HTTP_AUTH_ENABLED=false
@@ -150,7 +150,7 @@ services:
     image: grafana/loki:latest
     container_name: loki
     ports:
-      - "3100:3100"
+      - "3101:3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - loki-data:/loki
